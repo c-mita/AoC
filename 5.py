@@ -11,7 +11,7 @@ def print_animation(code_array):
         x_found = False
         for c in code_array:
             if c == 'x':
-                c = chr(random.randrange(0, 26, 1) + ord('a'))
+                c = "%x" % random.randrange(0, 16, 1)
                 x_found = True
             s += c
         sys.stdout.write(s)
@@ -65,4 +65,6 @@ def solve_2():
     find_password_2("ojvtpuvg", password)
     animation_thread.join()
 
+solve_1()
+print ""
 solve_2()
