@@ -1,0 +1,19 @@
+Gap @ (25, 20)
+get to (21, 4) = 16 + 4 = 20
+then to (0, 4) = 21 (+20)
+then to (0, 32) = 28 (69)
+
+With pattern:
+
+..
+_.
+D.
+It takes five moves to get:
+_.
+D.
+..
+
+So that's 32 * 5
+160
+Then +1 to move D into the empty slot
+69 + 161 = 230
