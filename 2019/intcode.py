@@ -2,6 +2,7 @@ class IntcodeTerminate(Exception): pass
 
 POS_MODE = 0
 IM_MODE = 1
+REL_MODE = 2
 
 
 def null_input():
@@ -18,8 +19,10 @@ def parse_input(filename):
 
 class IntcodeVm:
     def __init__(self, code, input_stream=null_input()):
-        self.mem = list(code)
+        self.mem = [0] * 1024*1024*8
+        self.mem[0:len(code)] = code
         self.pc = 0
+        self.rel_base = 0
         self.input_stream = input_stream
         self.ops = {
                 1:self.operator_add,
@@ -30,6 +33,7 @@ class IntcodeVm:
                 6:self.operator_jump_false,
                 7:self.operator_less_than,
                 8:self.operator_equals,
+                9:self.operator_rel_shift,
                 99:self.operator_terminate
                 }
         self.output = []
@@ -78,6 +82,10 @@ class IntcodeVm:
         m1, m2, m3 = modes[0], modes[1], modes[2]
         a1, a2, a3 = self.mem[self.pc+1], self.mem[self.pc+2], self.mem[self.pc+3]
 
+        a1 = a1 + self.rel_base if m1 == REL_MODE else a1
+        a2 = a2 + self.rel_base if m2 == REL_MODE else a2
+        a3 = a3 + self.rel_base if m3 == REL_MODE else a3
+
         v1 = a1 if m1 == IM_MODE else self.mem[a1]
         v2 = a2 if m2 == IM_MODE else self.mem[a2]
 
@@ -93,6 +101,10 @@ class IntcodeVm:
         m1, m2, m3 = modes[0], modes[1], modes[2]
         a1, a2, a3 = self.mem[self.pc+1], self.mem[self.pc+2], self.mem[self.pc+3]
 
+        a1 = a1 + self.rel_base if m1 == REL_MODE else a1
+        a2 = a2 + self.rel_base if m2 == REL_MODE else a2
+        a3 = a3 + self.rel_base if m3 == REL_MODE else a3
+
         v1 = a1 if m1 == IM_MODE else self.mem[a1]
         v2 = a2 if m2 == IM_MODE else self.mem[a2]
 
@@ -107,6 +119,7 @@ class IntcodeVm:
     def operator_in(self, modes):
         assert modes[0] != IM_MODE
         a1 = self.mem[self.pc + 1]
+        a1 = self.rel_base + a1 if modes[0] == REL_MODE else a1
         v = next(self.input_stream)
         self.mem[a1] = v
         self.pc += 2
@@ -115,6 +128,7 @@ class IntcodeVm:
     def operator_out(self, modes):
         m = modes[0]
         a = self.mem[self.pc + 1]
+        a = a + self.rel_base if m == REL_MODE else a
         v = a if m == IM_MODE else self.mem[a]
         self.pc += 2
         return v
@@ -123,6 +137,10 @@ class IntcodeVm:
     def operator_jump_true(self, modes):
         m1, m2 = modes[0], modes[1]
         a1, a2 = self.mem[self.pc + 1], self.mem[self.pc + 2]
+
+        a1 = a1 + self.rel_base if m1 == REL_MODE else a1
+        a2 = a2 + self.rel_base if m2 == REL_MODE else a2
+
         v1 = a1 if m1 == IM_MODE else self.mem[a1]
         v2 = a2 if m2 == IM_MODE else self.mem[a2]
 
@@ -132,6 +150,10 @@ class IntcodeVm:
     def operator_jump_false(self, modes):
         m1, m2 = modes[0], modes[1]
         a1, a2 = self.mem[self.pc + 1], self.mem[self.pc + 2]
+
+        a1 = a1 + self.rel_base if m1 == REL_MODE else a1
+        a2 = a2 + self.rel_base if m2 == REL_MODE else a2
+
         v1 = a1 if m1 == IM_MODE else self.mem[a1]
         v2 = a2 if m2 == IM_MODE else self.mem[a2]
 
@@ -142,6 +164,11 @@ class IntcodeVm:
         m1, m2, m3 = modes[0], modes[1], modes[2]
         assert m3 != IM_MODE
         a1, a2, a3 = self.mem[self.pc+1], self.mem[self.pc+2], self.mem[self.pc+3]
+
+        a1 = a1 + self.rel_base if m1 == REL_MODE else a1
+        a2 = a2 + self.rel_base if m2 == REL_MODE else a2
+        a3 = a3 + self.rel_base if m3 == REL_MODE else a3
+
         v1 = a1 if m1 == IM_MODE else self.mem[a1]
         v2 = a2 if m2 == IM_MODE else self.mem[a2]
 
@@ -153,8 +180,24 @@ class IntcodeVm:
         m1, m2, m3 = modes[0], modes[1], modes[2]
         assert m3 != IM_MODE
         a1, a2, a3 = self.mem[self.pc+1], self.mem[self.pc+2], self.mem[self.pc+3]
+
+        a1 = a1 + self.rel_base if m1 == REL_MODE else a1
+        a2 = a2 + self.rel_base if m2 == REL_MODE else a2
+        a3 = a3 + self.rel_base if m3 == REL_MODE else a3
+
         v1 = a1 if m1 == IM_MODE else self.mem[a1]
         v2 = a2 if m2 == IM_MODE else self.mem[a2]
 
         self.mem[a3] = 1 if v1 == v2 else 0
         self.pc += 4
+
+
+    def operator_rel_shift(self, modes):
+        m = modes[0]
+
+        a = self.mem[self.pc + 1]
+        a = a + self.rel_base if m == REL_MODE else a
+        v = a if m == IM_MODE else self.mem[a]
+
+        self.rel_base += v
+        self.pc += 2
