@@ -1,3 +1,5 @@
+import collections
+
 class IntcodeTerminate(Exception): pass
 
 POS_MODE = 0
@@ -19,8 +21,9 @@ def parse_input(filename):
 
 class IntcodeVm:
     def __init__(self, code, input_stream=null_input()):
-        self.mem = [0] * 1024*1024*8
-        self.mem[0:len(code)] = code
+        self.mem = collections.defaultdict(int)
+        for (n, c) in enumerate(code):
+            self.mem[n] = c
         self.pc = 0
         self.rel_base = 0
         self.input_stream = input_stream
