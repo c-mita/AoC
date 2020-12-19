@@ -16,34 +16,40 @@ def parse_file(filename):
         return rules, string_data.strip().split("\n")
 
 
-def match_subrule(sequence, rules, rule):
-    n = 0
-    for t in rule:
-        v = match_sequence(sequence[n:], rules, t)
-        if not v:
-            return 0
-        n += v
-    return n
+def match_rule(sequence, rules, rule):
+    if not rule:
+        yield sequence
+    else:
+        for seq in match(sequence, rules, rule[0]):
+            for rem in match_rule(seq, rules, rule[1:]):
+                yield rem
 
 
-def match_sequence(sequence, rules, target=0):
+def match(sequence, rules, target=0):
     """
-    Match the sequence greedily against rules.
-    Returns the length of the leading subsequence that was fully matched.
+    Attempts to match a sequence to the given rules.
+    Yielding "" indicates a full match.
     """
-    if len(sequence) == 0:
-        return 0
+    if not sequence:
+        return
     v = sequence[0]
-    rule = rules[target]
-    if rule == "a" or rule == "b":
-        return 1 if rule == v else 0
-    for r in rule:
-        v = match_subrule(sequence, rules, r)
-        if v:
-            return v
-    return 0
+    options = rules[target]
+    if options == "a" or options == "b":
+        if v == options:
+            yield sequence[1:]
+    else:
+        for rule in options:
+            for remainder in match_rule(sequence, rules, rule):
+                yield remainder
 
+
+test = {0:[(4,1,5)], 1:[(2,3),(3,2)], 2:[(4,4),(5,5)], 3:[(4,5),(5,4)], 4:"a", 5:"b"}
 
 rules, strings = parse_file("19.txt")
-matched = [s for s in strings if match_sequence(s, rules) == len(s)]
-print sum(1 for s in matched)
+matched = [s for s in strings if any(r == "" for r in match(s, rules))]
+print len(matched)
+
+rules[8] = [(42,), (42, 8)]
+rules[11] = [(42, 31), (42, 11, 31)]
+matched = [s for s in strings if any(r == "" for r in match(s, rules))]
+print len(matched)
