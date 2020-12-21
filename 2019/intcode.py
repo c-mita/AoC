@@ -77,6 +77,24 @@ class IntcodeVm:
         return
 
 
+    def run_for_input(self, input_value=None):
+        stream = iter([input_value]) if input_value is not None else iter([])
+        self.input_stream = stream
+        output = []
+        try:
+            while True:
+                try:
+                    v = self.step()
+                    if v is not None:
+                        self.output.append(v)
+                        output.append(v)
+                except StopIteration:
+                    return output
+        except IntcodeTerminate:
+            pass
+        return output
+
+
     def operator_terminate(self, modes):
         raise IntcodeTerminate()
 
@@ -121,9 +139,9 @@ class IntcodeVm:
 
     def operator_in(self, modes):
         assert modes[0] != IM_MODE
+        v = next(self.input_stream)
         a1 = self.mem[self.pc + 1]
         a1 = self.rel_base + a1 if modes[0] == REL_MODE else a1
-        v = next(self.input_stream)
         self.mem[a1] = v
         self.pc += 2
 
