@@ -78,7 +78,12 @@ class IntcodeVm:
 
 
     def run_for_input(self, input_value=None):
-        stream = iter([input_value]) if input_value is not None else iter([])
+        if input_value is None:
+            input_value = []
+        try:
+            stream = iter(input_value)
+        except TypeError:
+            stream = iter([input_value])
         self.input_stream = stream
         output = []
         try:
