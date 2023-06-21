@@ -5,12 +5,15 @@ At each step of the walk, our potential graph edges are building each of the
 possible robots (if possible), with some optimizations.
  * If a geode cracking robot can be built quicker than any other robot, don't
    consider the other robots.
+ * Track the best result so far and compare that to the maximum potential
+   result at the current state; if the best result cannot be beaten don't
+   proceed any further.
  * Check to see if the current set of robots has already been reached but at
    a sooner time-stamp - if so, stop
 Building nothing is also an option, but is "terminal"; just return how many
 geodes would get mined given the current state for the remaining time.
 
-~ 10 seconds on a Macbook; not great, not terrible.
+~ 2 seconds on a Macbook; not great, not terrible.
 """
 
 
@@ -107,8 +110,20 @@ def most_geodes(robot_costs, max_time=24):
             if t < t_geode:
                 yield (n_ore, n_clay, n_obs, n_geo), (ore_r + 1, clay_r, obsidian_r, geode_r), t
 
+    def max_potential(robots, minerals, time):
+        # assuming we build geode robots as fast as possible
+        # what is the maximum number of geodes attainable?
+        # time is time remaining
+        _ore, _clay, _obs, geodes = minerals
+        _r_ore, _r_clay, _r_obs, r_geode = robots
+        # "time - 1" because a robot doesn't collect anything the turn it is built
+        # so we have to consider one fewer time-step for the maximum
+        # ((1+k) + (2+k) + ... (n+k) == (1+2+...+n) + (n*k)
+        max_geode = (time * (time - 1)) // 2 + time * r_geode + geodes
+        return max_geode
+
     seen = {}
-    def dfs(robots, minerals, time):
+    def dfs(robots, minerals, time, best=0):
         # check to see if we've reached this amount of robots
         # any earlier before, if we have, we prune this branch
         # by just returning 0
@@ -124,7 +139,10 @@ def most_geodes(robot_costs, max_time=24):
             ntime = time - option_t
             if ntime < 0:
                 continue
-            potential = dfs(option_r, option_m, ntime)
+            if max_potential(option_r, option_m, ntime) < best:
+                continue
+            potential = dfs(option_r, option_m, ntime, best)
+            best = max(potential[0], best)
             results.append(potential)
         chain = ((robots, minerals, time),) + max(results)[1]
         return max(results)[0], chain
