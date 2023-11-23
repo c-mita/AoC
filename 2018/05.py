@@ -25,11 +25,11 @@ with open("05_input.txt") as f:
     polymer_string = f.readline().strip()
 
 compressed_polymer = process_polymer_string(polymer_string)
-print len(compressed_polymer)
+print(len(compressed_polymer))
 
-chars = [chr(x) for x in xrange(0x41, 0x41 + 26)]
+chars = [chr(x) for x in range(0x41, 0x41 + 26)]
 stripped_polymers = [(c, strip_polymer(compressed_polymer, c)) for c in chars]
 processed_polymers = [(c, process_polymer_string(s)) for (c, s) in stripped_polymers]
 
-(worst_c, shortest_polymer) = min(processed_polymers, key=lambda (c, s): len(s))
-print worst_c, len(shortest_polymer)
+(worst_c, shortest_polymer) = min(processed_polymers, key=lambda cs: len(cs[1]))
+print(len(shortest_polymer))

@@ -23,7 +23,7 @@ def deserialise_tree(data_stream):
     while node_stack:
         current_node = node_stack[-1]
         if current_node.n_children == len(current_node.children):
-            meta = list(next(data_stream) for n in xrange(current_node.n_meta))
+            meta = list(next(data_stream) for n in range(current_node.n_meta))
             meta_entries.extend(meta)
             current_node.metadata.extend(meta)
             node_stack.pop()
@@ -43,6 +43,6 @@ data = parse_input("08_input.txt")
 #data = TEST_DATA
 
 tree_root, meta_entries = deserialise_tree(iter(data))
-print sum(meta_entries)
+print(sum(meta_entries))
 
-print evaluate_tree(tree_root)
+print(evaluate_tree(tree_root))

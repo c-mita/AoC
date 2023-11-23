@@ -21,14 +21,14 @@ proc_graph = copy.deepcopy(graph)
 
 linear_steps = []
 while proc_graph:
-    candidates = [k for (k, v) in proc_graph.iteritems() if not v]
+    candidates = [k for (k, v) in proc_graph.items() if not v]
     step = sorted(candidates)[0]
     linear_steps.append(step)
     del proc_graph[step]
     for s in rev_graph[step]:
         proc_graph[s].remove(step)
 
-print "".join(linear_steps)
+print("".join(linear_steps))
 
 
 proc_graph = copy.deepcopy(graph)
@@ -40,7 +40,7 @@ running = set()
 time = 0
 while proc_graph:
     # add all candidate jobs to the running set (subject to worker constraint)
-    candidates = [k for (k, v) in proc_graph.iteritems() if not v]
+    candidates = [k for (k, v) in proc_graph.items() if not v]
     for step in sorted(candidates):
         if len(running) >= 5:
             break
@@ -48,7 +48,7 @@ while proc_graph:
         running.add((step, time + step_time_base + ord(step) - 0x40))
 
     # remove the first to complete job
-    (completed, complete_time) = min(running, key=lambda (step, time): time)
+    (completed, complete_time) = min(running, key=lambda st: st[1])
     running.remove((completed, complete_time))
     time = complete_time
     # remove completed job from dependency list
@@ -57,7 +57,7 @@ while proc_graph:
 
 
 if running:
-    complete_time = max(running, key=lambda (step, time): time)
+    complete_time = max(running, key=lambda st: st[1])
 else:
     complete_time = time
-print complete_time
+print(complete_time)

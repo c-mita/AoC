@@ -12,11 +12,11 @@ def play_game(n_players, max_count):
     current_node = Node(0)
     current_node.next = current_node
     current_node.prev = current_node
-    for iteration in xrange(1, max_count + 1):
+    for iteration in range(1, max_count + 1):
         if iteration % 23 == 0:
             current_player = (iteration - 1) % len(scores)
             scores[current_player] += iteration
-            for n in xrange(7):
+            for n in range(7):
                 current_node = current_node.prev
             scores[current_player] += current_node.value
             current_node.prev.next = current_node.next
@@ -42,9 +42,9 @@ game_params = (468, 71010)
 
 params = game_params
 scores = play_game(*params)
-print max(scores)
+print(max(scores))
 
 
 fuck_off_params = params[0], params[1] * 100
 scores = play_game(*fuck_off_params)
-print max(scores)
+print(max(scores))

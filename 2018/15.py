@@ -101,7 +101,8 @@ class Arena:
 
         if not reachable:
             return None
-        reachable = sorted(reachable, key=lambda (pos, distance, path): (distance, pos[1], pos[0]))
+        # lambda arg is (pos, distance, path) tuple
+        reachable = sorted(reachable, key=lambda k: (k[1], k[0][1], k[0][0]))
         pos, distance, path = reachable[0]
         return path[0]
 
@@ -110,8 +111,8 @@ with open("15_input.txt") as f:
 
 arena = Arena(initial_layout)
 rounds, score = arena.fight()
-print rounds, score
-print rounds * score
+print(rounds, score)
+print(rounds * score)
 
 
 elf_power = 4
@@ -125,6 +126,6 @@ while not elves_win:
         elves_win = False
         elf_power += 1
 
-print "Required elf power %d" % elf_power
-print rounds, score
-print rounds * score
+print("Required elf power %d" % elf_power)
+print(rounds, score)
+print(rounds * score)

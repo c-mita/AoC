@@ -20,20 +20,20 @@ def calc_bounding_box(x_pos, y_pos):
 
 
 def progress_state(x_pos, y_pos, x_vel, y_vel):
-    for i in xrange(len(x_pos)):
+    for i in range(len(x_pos)):
         x_pos[i] += x_vel[i]
         y_pos[i] += y_vel[i]
 
 
 def regress_state(x_pos, y_pos, x_vel, y_vel):
-    for i in xrange(len(x_pos)):
+    for i in range(len(x_pos)):
         x_pos[i] -= x_vel[i]
         y_pos[i] -= y_vel[i]
 
 
 def string_state(x_pos, y_pos):
     (x_min, y_min), (x_max, y_max) = calc_bounding_box(x_pos, y_pos)
-    grid = [[" "] * (x_max - x_min + 1) for y in xrange(y_min, y_max + 1)]
+    grid = [[" "] * (x_max - x_min + 1) for y in range(y_min, y_max + 1)]
     for (x, y) in zip(x_pos, y_pos):
         grid[y - y_min][x - x_min] = '#'
     return "\n".join("".join(row) for row in grid)
@@ -58,5 +58,5 @@ while area < prev_area:
     count += 1
 
 regress_state(x_pos, y_pos, x_vel, y_vel)
-print string_state(x_pos, y_pos)
-print count - 1
+print(string_state(x_pos, y_pos))
+print(count - 1)

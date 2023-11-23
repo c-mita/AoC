@@ -14,5 +14,5 @@ def find_first_repeat(deltas):
 
 
 deltas = parse_file("01_input.txt")
-print sum(deltas)
-print find_first_repeat(deltas)
+print(sum(deltas))
+print(find_first_repeat(deltas))

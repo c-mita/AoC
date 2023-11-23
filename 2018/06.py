@@ -26,12 +26,12 @@ def find_infinite_regions(grid, x_range, y_range):
 
 
 with open("06_input.txt") as f:
-    coords = [map(int, re.findall("\d+", coord.strip())) for coord in f.readlines()]
+    coords = [list(map(int, re.findall("\d+", coord.strip()))) for coord in f.readlines()]
 
-min_x = min(coords, key=lambda (x, y): x)[0]
-max_x = max(coords, key=lambda (x, y): x)[0]
-min_y = min(coords, key=lambda (x, y): y)[1]
-max_y = max(coords, key=lambda (x, y): y)[1]
+min_x = min(coords, key=lambda xy: xy[0])[0]
+max_x = max(coords, key=lambda xy: xy[0])[0]
+min_y = min(coords, key=lambda xy: xy[1])[1]
+max_y = max(coords, key=lambda xy: xy[1])[1]
 
 x_start, y_start = min_x - 1, min_y - 1
 x_end, y_end = max_x + 1, max_y + 1
@@ -42,8 +42,8 @@ adjusted_coords = [(x - x_start, y - y_start) for (x, y) in coords]
 min_grid = [None] * (x_range * y_range)
 sum_grid = [None] * (x_range * y_range)
 
-for y in xrange(y_range):
-    for x in xrange(x_range):
+for y in range(y_range):
+    for x in range(x_range):
         idx = y * x_range + x
         coord_distances = [abs(x - cx) + abs(y - cy) for (cx, cy) in adjusted_coords]
         sum_grid[idx] = sum(coord_distances)
@@ -57,8 +57,8 @@ for y in xrange(y_range):
 
 region_sizes = calc_regions(min_grid)
 infinite_regions = find_infinite_regions(min_grid, x_range, y_range)
-print region_sizes
-print infinite_regions
-print max(((k, v) for (k, v) in region_sizes.iteritems() if k not in infinite_regions and k != -1), key=lambda (k, v) : v)
+print(region_sizes)
+print(infinite_regions)
+print(max(((k, v) for (k, v) in region_sizes.items() if k not in infinite_regions and k != -1), key=lambda kv : kv[1]))
 
-print len(filter(lambda v: v < 10000, sum_grid))
+print(len(list(filter(lambda v: v < 10000, sum_grid))))

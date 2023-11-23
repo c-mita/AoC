@@ -12,7 +12,7 @@ def parse_input(filename):
 
 def step_state(i_start, i_end, state):
     next_state = {}
-    for i in xrange(i_start, i_end):
+    for i in range(i_start, i_end):
         l2 = state.get(i-2, ".")
         l1 = state.get(i-1, ".")
         c = state.get(i, ".")
@@ -35,13 +35,13 @@ initial_state = state
 
 i_start = -2
 i_end = len(state) + 2
-for n in xrange(20):
+for n in range(20):
     i_start, i_end, state = step_state(i_start, i_end, state)
 
 
-print "".join([state[k] for k in sorted(state)])
-print sorted(k for k in state if state[k] == "#")
-print sum(k for (k, v) in state.items() if v == "#")
+print("".join([state[k] for k in sorted(state)]))
+print(sorted(k for k in state if state[k] == "#"))
+print(sum(k for (k, v) in state.items() if v == "#"))
 
 
 """
@@ -54,11 +54,11 @@ i_start, i_end = -2, len(initial_state) + 2
 deltas = []
 s0, s1 = 0, 0
 n_lead = 300
-for n in xrange(n_lead):
+for n in range(n_lead):
     s0 = s1
     i_start, i_end, state = step_state(i_start, i_end, state)
     s1 = sum(k for (k, v) in state.items() if v == "#")
     deltas.append(s1 - s0)
 
-average = sum(deltas[-100:]) / 100
-print s1 + average * (50*10**9 - n_lead)
+average = sum(deltas[-100:]) // 100
+print(s1 + average * (50*10**9 - n_lead))

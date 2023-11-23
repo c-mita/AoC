@@ -21,7 +21,7 @@ def id_diff(s1, s2):
 
 def find_closest_match(ids):
     i = 0
-    for i in xrange(len(ids) - 1):
+    for i in range(len(ids) - 1):
         s1 = ids[i]
         for s2 in ids[i:]:
             delta, common = id_diff(s1, s2)
@@ -32,5 +32,5 @@ def find_closest_match(ids):
 with open("02_input.txt") as f:
     ids = f.readlines()
 
-print checksum(ids)
-print find_closest_match(ids)
+print(checksum(ids))
+print(find_closest_match(ids))

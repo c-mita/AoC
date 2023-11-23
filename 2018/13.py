@@ -88,5 +88,5 @@ while len(carts) > 1:
                 carts[n] = None
                 crash_locations.append(new_cart.location)
     carts = [c for c in carts if c is not None]
-print crash_locations
-print carts
+print(crash_locations[0])
+print(carts[0].location)

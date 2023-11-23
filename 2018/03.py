@@ -13,7 +13,7 @@ def claim_indices(claim, xlength):
     x_stop = x_start + claim.width
     y_start = claim.tmargin
     y_stop = y_start + claim.height
-    one_d_indices = [y * xlength + x for y in xrange(y_start, y_stop) for x in xrange(x_start, x_stop)]
+    one_d_indices = [y * xlength + x for y in range(y_start, y_stop) for x in range(x_start, x_stop)]
     return one_d_indices
 
 
@@ -40,5 +40,5 @@ with open("03_input.txt") as f:
     claims = parse_input(f.readlines())
 
 fabric = draw_claims(claims, 1000, 1000)
-print len([v for v in fabric if v > 1])
-print find_isolated_claims(claims, fabric, 1000)
+print(len([v for v in fabric if v > 1]))
+print(find_isolated_claims(claims, fabric, 1000))

@@ -42,7 +42,7 @@ for s in input_strings:
         time = awake_min - sleep_min
         sleep_durations.setdefault(current_guard, []).append(time)
         minutes = sleep_minute_count.setdefault(current_guard, {})
-        for m in xrange(sleep_min, awake_min):
+        for m in range(sleep_min, awake_min):
             minutes.setdefault(m, 0)
             minutes[m] += 1
     else:
@@ -50,12 +50,12 @@ for s in input_strings:
 
 sleepiest_guard = max(sleep_durations, key=lambda k: sum(sleep_durations[k]))
 sleepiest_worst_minute = max(sleep_minute_count[sleepiest_guard], key=lambda m: sleep_minute_count[sleepiest_guard][m])
-sleepiest_worst_minute = max(sleep_minute_count[sleepiest_guard].iteritems(), key=operator.itemgetter(1))[0]
-print sleepiest_guard, sleepiest_worst_minute
-print sleepiest_guard * sleepiest_worst_minute
+sleepiest_worst_minute = max(sleep_minute_count[sleepiest_guard].items(), key=operator.itemgetter(1))[0]
+print(sleepiest_guard, sleepiest_worst_minute)
+print(sleepiest_guard * sleepiest_worst_minute)
 
-guard, worst_minute, worst_minute_count = max(((g, minute, count) for g in sleep_minute_count for (minute, count) in sleep_minute_count[g].iteritems()),
+guard, worst_minute, worst_minute_count = max(((g, minute, count) for g in sleep_minute_count for (minute, count) in sleep_minute_count[g].items()),
         key=operator.itemgetter(2))
 
-print guard, worst_minute, worst_minute_count
-print guard * worst_minute
+print(guard, worst_minute, worst_minute_count)
+print(guard * worst_minute)
