@@ -1,5 +1,5 @@
 """
-Not a good solution for Part 2; it's a WIP. But it does techincally work.
+Not a great solution for Part 2, but it works.
 
 For Part 1 we just BFS over the space. Switches are basically XOR operations.
 We could just consider the power set of the switches and test, which really
@@ -9,20 +9,16 @@ once because a xor a == 0 and xor commutes).
 Part 2 is an integer linear programming problem. We treat it as a recursive
 backtracking one.
 
-The target is a vector T.
-Elements of the vector are:
-    T[i] == a0 * v0[i] + a1 * v1[i] + ... + an * vn[i]
-Where some vj[i] == 0 (ignore those).
-We need to find all values of the sequence (aj) that satisfy the constraint.
-We then need the one that minimises sum(aj).
+We try to order switches so that we process ones that "uniquely" affect components
+of the target first. After this, we prioritise ones that affect components with large
+values.
 
-We start by guessing a values for the index i s.t. T[i] contains the fewest
-number of "aj" coefficients in it. We choose a value and recurse.
+We can then guess the amount of times each switch is pressed recursively.
 
-This may not be the best way to do it.
+We can bound our guesses above and below by checking the components of the "remaining"
+target after taking into account of previous guesses.
 
-Runtime: > 6 hours.
-Yes, hours.
+Runtime: ~25 minutes.
 """
 
 
@@ -84,82 +80,80 @@ def toggle_switches(target, switches):
     return bfs(0, t, toggles)
 
 
-def add_switches(target, switches):
-    # Write t[0] as sum(alpha_i * s_i[0])
-    # Then we have a set of simultaneous equations
-    # Use a recursive backtracker to solve
-    # t_slots[0] is the [alpha_i, ...] that make up the coefficients for element
+def solve_switches(target, switches):
 
-    initial_t = [set() for n in range(len(target))]
-    coefficient_map = {}
-    for i, switch in enumerate(switches):
-        for s in switch:
-            initial_t[s].add(i)
-            if i not in coefficient_map:
-                coefficient_map[i] = []
-            coefficient_map[i].append(s)
+    # we want to reorder the switches into an order that helps processing
+    # We want the current switch to be the one selects "unique"
+    # components in the target out of the remaining unprocessed switches.
+    # In the event of a tie, prioritise the switch that affects the
+    # component with the largest value
+    def next_switch(remaining_switches):
+        frequencies = [0] * len(target)
+        for switch in remaining_switches:
+            for s in switch:
+                frequencies[s] += 1
+        fidx, fvalue = min(((i, s) for (i, s) in enumerate(frequencies) if s > 0), key=lambda k: k[1])
+        return max((switch for switch in remaining_switches if fidx in switch), key=lambda s:max(target[i] for i in s))
+        #return max((switch for switch in remaining_switches if fidx in switch), key=len)
 
+    switches = set(switches)
+    ordered_switches = []
+    while switches:
+        switch = next_switch(switches)
+        switches.remove(switch)
+        ordered_switches.append(switch)
+
+    switches = ordered_switches
     best_solution = 0x7FFFFFFF
 
-    def solve(coefficients, t_slots, reduced_target, coefficient_sum=0):
+    # Record if, for a given target component and switch index,
+    # there are follow-up switches that affect that target component
+    # i.e. if the current switch is not the last one affecting that
+    # component
+    have_other_switches = {}
+    for idx, switch in enumerate(switches):
+        for s in switch:
+            have_other_switches[(s, idx)] = False
+            for j in range(idx + 1, len(switches)):
+                other = switches[j]
+                if s in other:
+                    have_other_switches[(s, idx)] = True
+
+
+    def solve(switch_idx, reduced_target, presses=[]):
         nonlocal best_solution
-        if coefficient_sum > best_solution:
+        n_presses = sum(presses)
+        if n_presses >= best_solution:
             return
-        if not any(reduced_target):
-            if coefficient_sum < best_solution:
-                best_solution = coefficient_sum
-            yield list(coefficients)
+        if n_presses + max(reduced_target) >= best_solution:
             return
-        for v in reduced_target:
-            # bad guess
-            if v < 0:
-                return
-        slot_idx = None
-        slot_min = 0x7FFFFFFF
-        for idx in range(len(t_slots)):
-            l = len(t_slots[idx])
-            if l == 0:
-                continue
-            if l < slot_min:
-                slot_idx = idx
-                slot_min = l
-        if slot_idx is None:
-            # this leaf node failed
+        if switch_idx == len(switches):
+            if all(v == 0 for v in reduced_target):
+                best_solution = n_presses
+                yield list(presses)
             return
 
-        # we take a single value from this slot and guess its value
-        slot = t_slots[slot_idx]
-        # this is the coefficient we're guessing
-        to_guess = slot.pop()
-        for t_idx in coefficient_map[to_guess]:
-            if t_idx != slot_idx:
-                t_slots[t_idx].remove(to_guess)
-        # if it's the last value in the element in the target vector, there's
-        # only one guess to make
-        if not len(slot):
-            guess_range = (reduced_target[slot_idx],)
-        else:
-            max_guess = min(reduced_target[t_idx] for t_idx in coefficient_map[to_guess])
-            guess_range = range(max_guess,-1,-1)
-            #guess_range = range(max_guess+1)
-        for guess in guess_range:
+        # need to work out how many times we can press the current button
+        switch = switches[switch_idx]
+        max_presses = min(reduced_target[i] for i in switch)
 
-            for t_idx in coefficient_map[to_guess]:
-                reduced_target[t_idx] -= guess
+        # how many times must we press this button?
+        min_presses = 0
+        for s in switch:
+            if not have_other_switches[(s, switch_idx)]:
+                min_presses = max(min_presses, reduced_target[s])
 
-            coefficients[to_guess] = guess
-            yield from solve(coefficients, t_slots, reduced_target, coefficient_sum=coefficient_sum+guess)
-            coefficients[to_guess] = 0
+        for n in range(max_presses, min_presses-1, -1):
+            presses.append(n)
+            new_target = list(reduced_target)
+            for s in switch:
+                new_target[s] -= n
+            yield from solve(switch_idx + 1, new_target, presses)
+            presses.pop()
 
-            for t_idx in coefficient_map[to_guess]:
-                reduced_target[t_idx] += guess
-
-        for t_idx in coefficient_map[to_guess]:
-            t_slots[t_idx].add(to_guess)
-
-    coefficients = [0] * len(switches)
-    solutions = solve(coefficients, initial_t, list(target))
-    return min(solutions, key=lambda s: sum(s))
+    solutions = solve(0, target, [])
+    v = min(solutions, key=lambda s: sum(s))
+    return v
 
 
 TEST_DATA = """
@@ -180,7 +174,7 @@ print(s)
 #entries = test_entries
 s = 0
 for target, switches, joltages in entries:
-    solution = add_switches(joltages, switches)
+    solution = solve_switches(joltages, switches)
     print(solution)
     s += sum(solution)
 print(s)
